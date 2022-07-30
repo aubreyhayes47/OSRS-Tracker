@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ name }}{% endblock %}
+
+{% block body %}
+    <p>
+        {{ description }}
+    </p>
+    <img src="{{ 'https://secure.runescape.com/m=itemdb_rs/obj_big.gif?id=%s' %id }}" 
+    alt="{{ 'Picture of %s' %name }}">
+{% endblock %}

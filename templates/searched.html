@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}Search Results for "{{ search }}"{% endblock %}
+
+{% block body %}
+    <div style="text-align:right;">
+        <form action="/search" method="get">
+            <input autocomplete="off" autofocus id="value" name="value" placeholder="Item ID or Name" type="text">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    <h2 style="margin-left:auto;margin-right:auto;text-align:center;">Search results for "{{ search }}"</h2>
+    <table>
+            <thead style="font-weight:bold">
+                <tr>
+                    <td>Item ID</td>
+                    <td>Name</td>
+                    <td>High Price</td>
+                    <td>Low Price</td>
+                    <td>Buy Limit</td>
+                </tr>
+            </thead>
+            {% for id in ids %}
+                <tr>
+                    <td>{{ id }}</td>
+                    <td><a href="{{ '/item?id=%s' %id }}">{{ names[loop.index0] }}</a></td>
+                    <td>{{ highPrices[loop.index0] }} gp</td>
+                    <td>{{ lowPrices[loop.index0] }} gp</td>
+                    <td>{{ buyLimits[loop.index0] }}</td>
+                </tr>
+            {% endfor %}
+    </table>
+{% endblock %}
