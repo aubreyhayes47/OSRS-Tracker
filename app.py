@@ -51,7 +51,7 @@ def search():
     try:
         id = int(search)
         ids.append(id)
-        db = sqlite3.connect("items.db")
+        db = sqlite3.connect("main.db")
         cur = db.cursor()
         rows = cur.execute("SELECT * FROM items WHERE id = ?;", (id,))
 
@@ -67,7 +67,7 @@ def search():
     
     #If the search is not an integer, search for the id, name and prices based on the search term in the sql database
     except ValueError:
-        db = sqlite3.connect("items.db")
+        db = sqlite3.connect("main.db")
         cur = db.cursor()
         
         #This moves through each result from the select and adds the id, name, and prices to the respective lists
@@ -97,7 +97,7 @@ def item():
 
     #Get the item name based on id
     name = "NULL"
-    db = sqlite3.connect("items.db")
+    db = sqlite3.connect("main.db")
     cur = db.cursor()
     rows = cur.execute("SELECT * FROM items WHERE id = ?;", (id,))
     for row in rows:
