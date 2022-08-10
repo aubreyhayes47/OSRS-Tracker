@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}Item Not Found{% endblock %}
+
+
+{% block body %}
+    <h2 style="text-align:center;padding:3rem;">Sorry!<br>No item found for "{{ search }}"</h2>
+    
+    <div class="container-fluid d-flex justify-content-center">
+        <div class="nav-brand">
+            <form action="/search" method="get" class="d-flex align-items-center">
+                <input autocomplete="off" class="search-hover" type="search" placeholder="Search Item ID or Name" aria-label="Item ID or Name" id="value" name="value">
+                <button class="btn btn-default" type="submit"><img class="nav-image" src="/static/SearchButton.png" ></button>
+            </form>
+
+        </div>
+{% endblock %}

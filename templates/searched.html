@@ -3,12 +3,6 @@
 {% block title %}Search Results for "{{ search }}"{% endblock %}
 
 {% block body %}
-    <div style="text-align:right;">
-        <form action="/search" method="get">
-            <input autocomplete="off" autofocus id="value" name="value" placeholder="Item ID or Name" type="text">
-            <button type="submit">Search</button>
-        </form>
-    </div>
     <h2 style="margin-left:auto;margin-right:auto;text-align:center;">Search results for "{{ search }}"</h2>
     <table>
             <thead style="font-weight:bold">

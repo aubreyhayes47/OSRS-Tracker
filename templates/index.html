@@ -1,9 +1,21 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Runescape Price Tracker
+    Grand Exchange Paper Trader
 {% endblock %}
 
 {% block body %}
-    <p><a href="/search">Search here</a></p>
+<div class="mx-auto" style="text-align:center;width:66%;">
+    <h1>
+        Grand Exchange Paper Trader
+    </h1>
+    <p>
+        Welcome to the Grand Exchange Paper Trader! This website lets users practice trading on the Old School RuneScape Grand Exchange without risking their hard-earned gold. Click the buttons below to log in or register a new account.
+    </p>
+    <div class="d-flex justify-content-around">
+        <a href="/login"><img src="/static/LoginButton.jpg" style="height:4rem"></a>
+        <a href="/register"><img src="/static/RegisterButton.jpg" style="height:4rem"></a>
+        
+    </div>
+</div>
 {% endblock %}

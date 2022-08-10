@@ -19,3 +19,40 @@ table {
 th, td {
     border: 1px solid;
 }
+
+body{
+    background-color: #e2dbc8;
+    font-family: 'IBM Plex Sans','Helvetica Neue','Arial',sans-serif;
+}
+
+/* Navigation styling */
+
+.navbar{
+    background-color:#755538;
+}
+
+.nav-image{
+    height:3rem;
+}
+
+
+/* Search bar functionality */
+.search-hover {
+    border: 1px solid #ccc;
+    background-color: #e2dbc8;
+    outline: none;
+    background-size: 100%;
+    border-radius: 10px;
+    height: 2.3rem;
+    width: 4rem;
+    transition: all 0.5s;
+  }
+  .search-hover:hover {
+    width: 15rem;
+    padding-left: 1rem;
+  }
+
+
+  .search-hover::-webkit-search-cancel-button{
+    -webkit-appearance: none;
+  }

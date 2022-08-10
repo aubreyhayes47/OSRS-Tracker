@@ -13,6 +13,10 @@ app = Flask(__name__)
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+#Create data global. It will be updated whenever a search is made. 
+#This prevents it being called when item or other pages are loaded, but means we must perform a search on server bootup
+data = {}
+
 #Change the user agent for python requests
 headers = {
     'User-Agent': 'Test Project - irish775#2989',
@@ -27,6 +31,8 @@ def pricecheck(id, data):
 @app.route("/")
 def home():
     #This gets the data for the abyssal whip and renders the search page
+    if list(session.keys())[0] == "user_id":
+        return render_template("search.html")
     return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -39,24 +45,24 @@ def login():
         db = sqlite3.connect("main.db")
         # Ensure username was submitted
         if not request.form.get("username"):
-            return render_template("403error.html", error="no username")
+            return render_template("noUser.html")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return render_template("403error.html", error="no password")
+            return render_template("noPass.html")
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),)).fetchall()
-        print(rows[0])
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0][2], request.form.get("password")):
-            return render_template("403error.html", error="incorrect username or password")
+            return render_template("incorrectLogin.html")
 
         # Remember which user has logged in
         session["user_id"] = rows[0][0]
 
         db.close()
+
         # Redirect user to home page
         return redirect("/")
 
@@ -75,6 +81,8 @@ def logout():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    session.clear()
+
     """Register user"""
     #If the request method is get, render a form to allow them to input info
     #The form should post that info back to /register
@@ -86,21 +94,21 @@ def register():
         db = sqlite3.connect("main.db")
         #Make sure the username exists
         if not request.form.get("username"):
-            return render_template("403error.html", error="no username")
+            return render_template("registrationFailed.html", error="Please enter a username.")
 
         #Make sure it is not already registered
         for row in db.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),)):
-            return render_template("403error.html", error="username already taken")
+            return render_template("registrationFailed.html", error="Username already in use.")
 
         #Make sure neither password is blank
         if not request.form.get("password"):
-            return render_template("403error.html", error="no password")
+            return render_template("registrationFailed.html", error="Please enter a password.")
         if not request.form.get("confirmation"):
-            return render_template("403error.html", error="must confirm password")
+            return render_template("registrationFailed.html", error="Must confirm password.")
 
         #Make sure the passwords match
         if request.form.get("password") != request.form.get("confirmation"):
-            return render_template("403error.html", error="password and confirmation must match")
+            return render_template("registrationFailed.html", error="Password and confirmation must match.")
 
         #Store the new user
         username = request.form.get("username")
@@ -108,8 +116,9 @@ def register():
         db.execute("INSERT INTO users (username, hash) VALUES(?, ?)", (username, hash,))
         db.commit()
         db.close()
-        return render_template("registered.html")
+        
         #After storing the new user, render registered template which extends /login with a success message
+        return render_template("registered.html")
 
 @app.route("/search")
 def search():
@@ -124,7 +133,7 @@ def search():
     response = response.json()
 
      #Save the data as a dictionary
-    data = response["data"]
+    data.update(response["data"])
     #Check if item name or id was entered
     #Find the latest prices of the item
     #Display the name,  id and prices
@@ -135,17 +144,20 @@ def search():
     lowPrices=[]
     buyLimits = []
     db = sqlite3.connect("main.db")
-     #If the search term is an integer, search for the name based on the id
+    #If the search term is an integer, search for the name based on the id
+    length = False
     try:
         id = int(search)
         ids.append(id)
         cur = db.cursor()
         rows = cur.execute("SELECT * FROM items WHERE id = ?;", (id,))
 
-         #This moves through the result from the select and adds the id, name, and prices to the respective lists
+        #This moves through the result from the select and adds the id, name, and prices to the respective lists
         for row in rows:
+            length = True
             name = row[1]
-            names.append(name)
+            print(name)
+            names.append(name.title())
             buyLimits.append(row[2])
             prices = pricecheck(id, data)
             highPrices.append(prices['high'])
@@ -157,40 +169,37 @@ def search():
         
         #This moves through each result from the select and adds the id, name, and prices to the respective lists
         for row in cur.execute("SELECT * FROM items WHERE name LIKE ?;", ("%"+search+"%",)):
+            length = True
             try:
                 prices = pricecheck(row[0], data)
             except KeyError:
                 continue
             ids.append(row[0])
-            names.append(row[1])
+            names.append(row[1].title())
             buyLimits.append(row[2])
             highPrices.append(prices['high'])
             lowPrices.append(prices['low'])
     db.close()
+    
+    if not length:
+        return render_template("itemMissing.html", search=search)
+
     return render_template("searched.html", ids=ids,names=names, highPrices=highPrices, 
     lowPrices=lowPrices, buyLimits=buyLimits, search=search)
 
 @app.route("/item")
 def item():
+    
     #Return an error if there is no item id entered
     if not request.args.get("id"):
-        return render_template("403error.html", error="item does not exist")
+        return render_template("404error.html", error="Item does not exist.")
 
     #Render information based on the item id entered
     #Get the id
     id = request.args.get("id")
 
-    #Fetch data from the API and convert to json
-    url = f"https://prices.runescape.wiki/api/v1/osrs/latest?id={id}"
-    response = requests.get(url=url,headers=headers)
-    response = response.json()
-    #Save the data as a dictionary
-    data = response["data"]
-
     highPrice = data[str(id)]["high"]
     lowPrice = data[str(id)]["low"]
-
-    print(data)
 
     #Get the item name based on id
     name = "NULL"
@@ -198,13 +207,13 @@ def item():
     cur = db.cursor()
     rows = cur.execute("SELECT * FROM items WHERE id = ?;", (id,))
     for row in rows:
-        name = row[1]
+        name = row[1].title()
         buyLimit = row[2]
         description = row[3]
     db.close()
     #Render error if name not found
     if name == "NULL":
-        return render_template("403error.html", error="item not found")
+        return render_template("404error.html", error="Item not found.")
     
     #Render the item's page
     return render_template("item.html", name=name, description=description, id=id, highPrice=highPrice, lowPrice=lowPrice, buyLimit=buyLimit)

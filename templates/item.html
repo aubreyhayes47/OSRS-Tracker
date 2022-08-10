@@ -3,9 +3,24 @@
 {% block title %}{{ name }}{% endblock %}
 
 {% block body %}
+    <h2>{{ name }}</h2>
     <p>
         {{ description }}
     </p>
     <img src="{{ 'https://secure.runescape.com/m=itemdb_rs/obj_big.gif?id=%s' %id }}" 
     alt="{{ 'Picture of %s' %name }}">
+    <table>
+        <thead style="font-weight:bold">
+            <tr>
+                <td>High Price</td>
+                <td>Low Price</td>
+                <td>Buy Limit</td>
+            </tr>
+        </thead>
+            <tr>
+                <td>{{ highPrice }} gp</td>
+                <td>{{ lowPrice }} gp</td>
+                <td>{{ buyLimit }}</td>
+            </tr>
+</table>
 {% endblock %}
