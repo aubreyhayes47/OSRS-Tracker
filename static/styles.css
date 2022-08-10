@@ -26,9 +26,21 @@ body{
 }
 
 /* Navigation styling */
-
+/* 
 .navbar{
     background-color:#755538;
+} */
+
+.sidebar{
+    background-color:#755538;
+}
+
+.banner{
+    background-color:#755538;
+    background-image: url("./Logo.jpg");
+    background-repeat: no-repeat;
+    background-size: 25% 100%;
+    background-position: center center;
 }
 
 .nav-image{
@@ -44,13 +56,13 @@ body{
     background-size: 100%;
     border-radius: 10px;
     height: 2.3rem;
-    width: 4rem;
+    width:100%;
     transition: all 0.5s;
   }
-  .search-hover:hover {
+  /* .search-hover:hover {
     width: 15rem;
     padding-left: 1rem;
-  }
+  } */
 
 
   .search-hover::-webkit-search-cancel-button{

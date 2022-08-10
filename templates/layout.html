@@ -15,33 +15,42 @@
         <title>{% block title %}{% endblock %}</title>
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg">
-            <div class="container-fluid">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/"><img class="nav-image" src="/static/HomeButton.jpg"></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/search"><img class="nav-image" src="/static/SearchButton.png" ></a>
-                    </li>
-                </ul>
+        <div class="row justify-content-center">
+            <div class="banner" style="height:5rem;"></div>
+        </div>
+        <div class="row vh-100">
+            <div class="col-1 sidebar">
+                <nav class="navbar">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="/"><img class="nav-image" src="/static/HomeButton.jpg"></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" href="/search"><img class="nav-image" src="/static/SearchButton.png" ></a>
+                            </li>
+                            <li>
+                                {% if session["user_id"] %}  
+                                    <a class="nav-link active ms-auto" href="/logout"><img class="nav-image" src="/static/LogoutButton.jpg"></a>
+                                {% else %}
+                                    <a class="nav-link active ms-auto" href="/login"><img class="nav-image" src="/static/LoginButton.jpg"></a>
+                                {% endif %}
+                            </li>
+                            <li>
+                            <form action="/search" method="get">
+                                <li>
+                                    <input autocomplete="off" class="search-hover" type="search" placeholder="Search" aria-label="Item ID or Name" id="value" name="value">
+                                </li>
+                                <li class="row">
+                                    <button class="btn btn-default start-0" type="submit"><img class="nav-image" src="/static/magnifying-glass.png" ></button>
+                                </li>
+                            </form>
+                        </li>
+                        </ul>
+                </nav>
             </div>
-            <div class="container-fluid d-flex flex-row-reverse">
-                <div class="nav-brand">
-                    <form action="/search" method="get" class="d-flex align-items-center">
-                        {% if session["user_id"] %}  
-                            <a class="nav-link active ms-auto" href="/logout"><img class="nav-image" src="/static/LogoutButton.jpg"></a>
-                        {% else %}
-                            <a class="nav-link active ms-auto" href="/login"><img class="nav-image" src="/static/LoginButton.jpg"></a>
-                        {% endif %}
-                        <input autocomplete="off" class="search-hover" type="search" placeholder="Search Item ID or Name" aria-label="Item ID or Name" id="value" name="value">
-                        <button class="btn btn-default" type="submit"><img class="nav-image" src="/static/SearchButton.png" ></button>
-                    </form>
-                    
-                </div>
-                
+            <div class="col h-100">
+                {% block body %}{% endblock %}
             </div>
-        </nav>
-        {% block body %}{% endblock %}
+        </div>
     </body>
 </html>
