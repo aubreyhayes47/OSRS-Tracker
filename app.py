@@ -21,11 +21,6 @@ data = {}
 headers = {
     'User-Agent': 'Test Project - irish775#2989',
 }
-
-#This checks the price of an item based on id
-def pricecheck(id, data):
-    #Index into the data to find the high, low, highTime, and lowTime for this item
-    return data[f"{id}"]
     
 
 @app.route("/")
@@ -159,7 +154,7 @@ def search():
             print(name)
             names.append(name.title())
             buyLimits.append(row[2])
-            prices = pricecheck(id, data)
+            prices = data[f"{id}"]
             highPrices.append(prices['high'])
             lowPrices.append(prices['low'])
     
@@ -171,7 +166,7 @@ def search():
         for row in cur.execute("SELECT * FROM items WHERE name LIKE ?;", ("%"+search+"%",)):
             length = True
             try:
-                prices = pricecheck(row[0], data)
+                prices = data[f"{row[0]}"]
             except KeyError:
                 continue
             ids.append(row[0])
