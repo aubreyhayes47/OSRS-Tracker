@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Grand Exchange Price Tracker
+{% endblock %}
+
+{% block body %}
+    <h2 style="margin-left:auto;margin-right:auto;text-align:center;">Current Holdings</h2>
+    <p class="mx-auto w-50" style="text-align:center;">Click on any of the item names below to go to that item's page or click the heart icon on the right-most column to remove the item from tracking. Use the search bar on the sidebar to look up new items for trading! </p>
+    <table>
+            <thead style="font-weight:bold">
+                <tr>
+                    <td>Item ID</td>
+                    <td>Name</td>
+                    <td>High Price</td>
+                    <td>Low Price</td>
+                    <td>Buy Limit</td>
+                    <td>Unsave</td>
+                </tr>
+            </thead>
+            {% for holding in holdings %}
+                <tr>
+                    <td>{{ holding["id"] }}</td>
+                    <td><a href="{{ '/item?id=%s' %holding['id'] }}">{{ holding["name"] }}</a></td>
+                    <td>{{ holding["highPrice"] }} gp</td>
+                    <td>{{ holding["lowPrice"] }} gp</td>
+                    <td>{{ holding["buyLimit"] }}</td>
+                    <td>
+                        <form action="/remove" method="post">
+                            <input name="id" type="hidden" value="{{ holding['id'] }}">
+                            <button class="btn btn-small" type="submit" aria-placeholder="unsave">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+    </table>
+{% endblock %}

@@ -36,11 +36,15 @@ body{
 }
 
 .banner{
-    background-color:#755538;
+    /* background-color:#755538;
     background-image: url("./Logo.jpg");
     background-repeat: no-repeat;
     background-size: 25% 100%;
-    background-position: center center;
+    background-position: center center; */
+    background-image:url("./Old_School_RuneScape_Wiki_background.jpg");
+    background-size: 100% 125%;
+    background-repeat: no-repeat;
+    background-color: #c0a886;
 }
 
 .nav-image{
@@ -67,4 +71,8 @@ body{
 
   .search-hover::-webkit-search-cancel-button{
     -webkit-appearance: none;
+  }
+
+  .form-label{
+    text-align:left;
   }

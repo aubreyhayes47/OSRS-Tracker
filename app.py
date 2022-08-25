@@ -1,4 +1,5 @@
 import os
+from re import L
 import requests
 import sqlite3
 import urllib.parse
@@ -27,7 +28,28 @@ headers = {
 def home():
     #This gets the data for the abyssal whip and renders the search page
     if list(session.keys())[0] == "user_id":
-        return render_template("search.html")
+        #Get all holdings of user
+        holdings = []
+        db = sqlite3.connect("main.db")
+        rows = db.execute("SELECT item_id FROM holdings WHERE user_id = ?;", (session["user_id"],))
+        #Make a dict for each item that is held. The first key of the dict is the item id 
+        for row in rows:
+            #Find the item name and info
+            #For name and buy limit, we must call the item db, which returns a set. Sets don't support indexing so 
+            #we cast it to a list and index in
+            name = list(db.execute("SELECT name FROM items WHERE id = ?", (row[0],)).fetchall()[0])[0]
+            buyLimit = list(db.execute("SELECT buyLimit FROM items WHERE id = ?", (row[0],)).fetchall()[0])[0]
+            #For prices, we index into data which is updated whenever a search is performed
+            prices = data[f"{row[0]}"]
+            highPrice = prices["high"]
+            lowPrice = prices["low"]
+            #Finally, holdings is a list of dicts
+            #Each dict has info for the item that is held
+            holdings.append({"id":row[0],"name":name, "highPrice":highPrice,"lowPrice":lowPrice,"buyLimit":buyLimit,})
+        db.close()
+        #Load up their portfolio
+        holdings = sorted(holdings, key=lambda i:i["name"])
+        return render_template("portfolio.html", holdings=holdings)
     return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -105,6 +127,12 @@ def register():
         if request.form.get("password") != request.form.get("confirmation"):
             return render_template("registrationFailed.html", error="Password and confirmation must match.")
 
+        #Disallow forbidden characters in password
+        forbiddenChars = [",",";","'","\"",":"]
+        for char in forbiddenChars:
+            if char in request.form.get("password") or request.form.get("username"):
+                return render_template("registrationFailed.html", error="Username and password must not contain any of the following characters: , ; ' \" :")
+
         #Store the new user
         username = request.form.get("username")
         hash = generate_password_hash(request.form.get("password"), method='pbkdf2:sha256', salt_length=8)
@@ -151,7 +179,6 @@ def search():
         for row in rows:
             length = True
             name = row[1]
-            print(name)
             names.append(name.title())
             buyLimits.append(row[2])
             prices = data[f"{id}"]
@@ -198,6 +225,7 @@ def item():
 
     #Get the item name based on id
     name = "NULL"
+    held = False
     db = sqlite3.connect("main.db")
     cur = db.cursor()
     rows = cur.execute("SELECT * FROM items WHERE id = ?;", (id,))
@@ -205,10 +233,90 @@ def item():
         name = row[1].title()
         buyLimit = row[2]
         description = row[3]
+    #Check if the item is held by the player
+    if "user_id" in session.keys():
+        rows = cur.execute("SELECT * from holdings WHERE item_id = ? and user_id = ?;", (id, session["user_id"]))
+        for row in rows:
+            held = True
     db.close()
     #Render error if name not found
     if name == "NULL":
         return render_template("404error.html", error="Item not found.")
     
     #Render the item's page
-    return render_template("item.html", name=name, description=description, id=id, highPrice=highPrice, lowPrice=lowPrice, buyLimit=buyLimit)
+    return render_template("item.html", name=name, description=description, id=id, highPrice=highPrice, lowPrice=lowPrice, buyLimit=buyLimit, held=held)
+
+@app.route("/save", methods=["POST"])
+def save():
+    if not request.form.get("id"):
+        return redirect("/")
+
+    if  "user_id" not in session.keys():
+        return redirect("/login")
+
+    id = request.form.get("id")
+
+    #Save the item to the user's holdings
+    db = sqlite3.connect("main.db")
+    #Ensure the item is not already saved
+    present = False
+    rows = db.execute("SELECT * FROM holdings WHERE item_id = ? AND user_id = ?", (id, session["user_id"],))
+    for row in rows:
+        present = True
+    #Save the item if not saved already
+    if not present:
+        db.execute("INSERT INTO holdings (item_id, user_id) VALUES (?, ?)", (id, session["user_id"]))
+        db.commit()
+    db.close()
+    #Redirect back to the item's page
+    url = "/item?id=" + str(id)
+    return redirect(url)
+
+@app.route("/unsave", methods=["POST"])
+def unsave():
+    #Ensure an id was entered by a logged in user
+    if not request.form.get("id"):
+        return redirect("/")
+
+    if "user_id" not in session.keys():
+        return redirect("/login")
+
+    id = request.form.get("id")
+    db = sqlite3.connect("main.db")
+    #Ensure the item is already saved
+    present = False
+    rows = db.execute("SELECT * FROM holdings WHERE item_id = ? AND user_id = ?", (id, session["user_id"]))
+    for row in rows:
+        present = True
+    #Unsave the item if saved already
+    if present:
+        db.execute("DELETE FROM holdings WHERE item_id = ? AND user_id = ?", (id, session["user_id"]))
+        db.commit()
+    db.close()
+    #Redirect back to the item's page
+    url = "/item?id=" + str(id)
+    return redirect(url)
+
+@app.route("/remove", methods=["POST"])
+def remove():
+    #Ensure an id was entered by a logged in user
+    if not request.form.get("id"):
+        return redirect("/")
+
+    if "user_id" not in session.keys():
+        return redirect("/")
+
+    id = request.form.get("id")
+    db = sqlite3.connect("main.db")
+    #Ensure the item is already saved
+    present = False
+    rows = db.execute("SELECT * FROM holdings WHERE item_id = ? AND user_id = ?", (id, session["user_id"]))
+    for row in rows:
+        present = True
+    #Unsave the item if saved already
+    if present:
+        db.execute("DELETE FROM holdings WHERE item_id = ? AND user_id = ?", (id, session["user_id"]))
+        db.commit()
+    db.close()
+    #Redirect back to the item's page
+    return redirect("/")

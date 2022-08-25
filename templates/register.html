@@ -6,11 +6,15 @@
     <div style="text-align:center;">
         <h2>Register</h2>
         <form action="/register" method="post">
-            <input autocomplete="off" autofocus id="username" name="username" placeholder="username" type="text"><br>
-            <input autocomplete="off" autofocus id="password" name="password" placeholder="password" type="password"><br>
-            <input autocomplete="off" autofocus id="confirmation" name="confirmation" placeholder="confirmation" type="password"><br>
+            <br>
+            <input autocomplete="off" autofocus id="username" name="username" placeholder="Username" type="text" class="form-control">
+            <br>
+            <input autocomplete="off" autofocus id="password" name="password" placeholder="Password" type="password" class="form-control">
+            <br>
+            <input autocomplete="off" autofocus id="confirmation" name="confirmation" placeholder="Confirm Password" class="form-control" type="password">
             {% block fail %}{% endblock %}<br>
-            <button type="submit">Register</button>
+            <br>
+            <button class = "btn" type="submit"><img class = "w-50" src="/static/RegisterButton.jpg"></button>
         </form>
     </div>
 {% endblock %}
